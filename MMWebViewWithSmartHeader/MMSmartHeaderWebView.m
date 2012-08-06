@@ -10,16 +10,21 @@
 
 @interface MMSmartHeaderWebView ()
 
-@property BOOL fingerIsDown;
-
-@property (nonatomic, retain) UIImageView *scrollIndicatorVertical;
-
 @end
 
 @implementation MMSmartHeaderWebView
 @synthesize webView;
-@synthesize headerView;
-@synthesize fingerIsDown;
+@synthesize headerView = _headerView;
+@synthesize pinHeader;
+
+- (void)setHeaderView:(UIView *)newHeaderView {
+    
+    _headerView = newHeaderView;
+    
+    self.webView.scrollView.contentInset = UIEdgeInsetsMake(self.headerView.frame.size.height, 0.0f, 0.0f, 0.0f);
+    self.headerView.frame = CGRectMake(0, 0, self.headerView.frame.size.width, -self.headerView.frame.size.height);
+    [self.webView.scrollView addSubview:self.headerView];
+}
 
 - (void)viewDidLoad
 {
@@ -28,12 +33,12 @@
     [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://michaelmanesh.com"]]];
     
     [self.webView.scrollView setDelegate:self];
-
-    self.webView.scrollView.contentInset = UIEdgeInsetsMake(self.headerView.frame.size.height, 0.0f, 0.0f, 0.0f);
-    self.headerView.frame = CGRectMake(0, 0, self.headerView.frame.size.width, -self.headerView.frame.size.height);
-    [self.webView.scrollView addSubview:self.headerView];
+    [self.webView setDelegate:self];
     
-    [self.webView.scrollView setScrollsToTop:YES];
+    UIView *newHeader = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320., 70)];
+    newHeader.backgroundColor = [UIColor darkGrayColor];
+    self.headerView = newHeader;
+
 }
 
 - (void)viewDidUnload
@@ -55,6 +60,15 @@
 {
     float bottomOfHeaderView = MAX(0, -scrollView.contentOffset.y);
     self.webView.scrollView.scrollIndicatorInsets = UIEdgeInsetsMake(bottomOfHeaderView, 0, 0, 0);
+    
+    // anchor the header at the top of the screen
+    if (pinHeader) {
+        CGRect headerFrame = self.headerView.frame;
+        headerFrame.origin.y = MAX(0, -scrollView.contentOffset.y - self.headerView.frame.size.height);
+        self.headerView.frame = headerFrame;
+        
+        [self.view addSubview:self.headerView];
+    }
 }
 
 @end

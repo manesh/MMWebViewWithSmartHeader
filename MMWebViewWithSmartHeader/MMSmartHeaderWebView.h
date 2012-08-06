@@ -8,9 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MMSmartHeaderWebView : UIViewController <UIWebViewDelegate, UIScrollViewDelegate>
+@interface MMSmartHeaderWebView : UIViewController <UIWebViewDelegate, UIScrollViewDelegate> {
+    UIView *headerView;
+}
 
 @property (weak, nonatomic) IBOutlet UIWebView *webView;
-@property (weak, nonatomic) IBOutlet UIView *headerView;
+@property (weak, nonatomic) UIView *headerView;
+
+@property BOOL pinHeader;
 
 @end
