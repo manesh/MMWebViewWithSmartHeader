@@ -12,6 +12,8 @@
 
 @property BOOL fingerIsDown;
 
+@property (nonatomic, retain) UIImageView *scrollIndicatorVertical;
+
 @end
 
 @implementation MMSmartHeaderWebView
@@ -26,13 +28,27 @@
     [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://michaelmanesh.com"]]];
     
     [self.webView.scrollView setDelegate:self];
+    /*
+    self.webView.scrollView.clipsToBounds = NO;
+    self.webView.scrollView.contentInset = UIEdgeInsetsMake(self.headerView.frame.size.height, 0, 0, 0);
+    [self.webView.scrollView addSubview:self.headerView];
+     */
     
     //[(UIScrollView *) self.view setContentSize: CGSizeMake(self.view.frame.size.width, self.view.frame.size.height)];
     
-    //self.webView.scrollView.contentInset = UIEdgeInsetsMake(self.headerView.frame.size.height, 0.0f, 0.0f, 0.0f);
-    //self.headerView.frame = CGRectMake(0, 0, self.headerView.frame.size.width, -self.headerView.frame.size.height);
-    //[self.webView.scrollView addSubview:self.headerView];
-
+    self.webView.scrollView.contentInset = UIEdgeInsetsMake(self.headerView.frame.size.height, 0.0f, 0.0f, 0.0f);
+    self.headerView.frame = CGRectMake(0, 0, self.headerView.frame.size.width, -self.headerView.frame.size.height);
+    [self.webView.scrollView addSubview:self.headerView];
+    
+    [self.webView.scrollView setScrollsToTop:YES];
+    
+    //[self.webView.scrollView setShowsHorizontalScrollIndicator:NO];
+    [self.webView.scrollView setShowsVerticalScrollIndicator:NO];
+    
+    UIImage *scrollbar = [UIImage imageNamed:@"scroll-bar.png"];
+    self.scrollIndicatorVertical = [[UIImageView alloc] initWithImage:[scrollbar stretchableImageWithLeftCapWidth:0 topCapHeight:5]];
+    self.scrollIndicatorVertical.alpha = 0.0;
+    [self.webView addSubview:self.scrollIndicatorVertical];
 }
 
 - (void)viewDidUnload
@@ -52,105 +68,47 @@
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    float numberOfPointsOfHeaderViewVisible = self.headerView.frame.size.height + self.headerView.frame.origin.y;
     float contentOffset = scrollView.contentOffset.y;
+    float contentHeight = scrollView.contentSize.height;
+    float numberOfPointsOfHeaderViewVisible = MIN(self.headerView.frame.size.height, self.headerView.frame.size.height - contentOffset);
+    float bottomOfHeaderView = MAX(0, - contentOffset);
+    float frameHeight = self.webView.frame.size.height;
     
-    NSLog(@"%f", contentOffset);
+    float maxContentOffset = contentHeight - frameHeight;
     
-    // case A: we are pushing up, hiding the header view and increasing the size of the webview.
-    if(contentOffset > 0.0) {
+    // we we interpret content offset values between 0 and maxContentOffset to move the scroll bar around.
+    // less than 0 or greater than the maxContentOffset means we are bouncing, and need to use special behavior
+    float percentageVisible = frameHeight / scrollView.contentSize.height;
+    float scrollBarHeight = percentageVisible * frameHeight;
+    float percentageScrolled = contentOffset / maxContentOffset;
+    float scrollBarPosition = percentageScrolled * (frameHeight - scrollBarHeight);
+    
+    self.scrollIndicatorVertical.frame = CGRectMake(312, scrollBarPosition, 7, scrollBarHeight);
+    
+    // the scrollbar is partially visible, but we are not past it
+    if (contentOffset < 0 && contentOffset > -self.headerView.frame.size.height) {
+        float percentageVisible = (frameHeight + contentOffset) / scrollView.contentSize.height;
+        float scrollBarHeight = percentageVisible * frameHeight;
+        self.scrollIndicatorVertical.frame = CGRectMake(312, bottomOfHeaderView, 7, scrollBarHeight);
+    }
+    // the scrollbar is fully visible, and we are past it and into bounce territory
+    // we double the scroll bar's shrinkage rate at this point
+    else if (contentOffset <= -self.headerView.frame.size.height) {
+        float howMuchPast = contentOffset + self.headerView.frame.size.height;
+        float percentageVisible = (frameHeight + contentOffset) / scrollView.contentSize.height;
+        float scrollBarHeight = MAX((percentageVisible * frameHeight) + howMuchPast, 8.);
         
-        NSLog(@"A");
-        
-        // if the header is still visible at all
-        if (numberOfPointsOfHeaderViewVisible > 0.0) {
-            
-            // push the header up.
-            float newHeaderPositionY = self.headerView.frame.origin.y - contentOffset;
-            CGRect headerFrame = self.headerView.frame;
-            headerFrame.origin.y = MAX(newHeaderPositionY, -self.headerView.frame.size.height);
-            self.headerView.frame = headerFrame;
-            
-            // adjust the size of the web view.
-            CGRect webFrame = self.webView.frame;
-            webFrame.origin.y = self.headerView.frame.size.height + self.headerView.frame.origin.y;
-            webFrame.size.height = MIN(self.view.frame.size.height - webFrame.origin.y, self.view.frame.size.height);
-            self.webView.frame = webFrame;
-            
-            // keep the webview from scrolling
-            //self.webView.scrollView.contentOffset = CGPointZero;
-            
-            // in theory, we need to take any "remainder" offset and apply it to the webview for a perfectly smooth transition.
-            // for instance, if there's 10 points of header showing and the view scrolls 20 points in one step, the
-            // header's offset should be set to 10. In practice, it doesn't make a difference.
-        }
+        self.scrollIndicatorVertical.frame = CGRectMake(312, bottomOfHeaderView, 7, scrollBarHeight);
+    }
+    else if (contentOffset >= maxContentOffset) {
+        float howMuchPast = maxContentOffset - contentOffset;
+        self.scrollIndicatorVertical.frame = CGRectMake(312, MIN(frameHeight-scrollBarHeight-howMuchPast, frameHeight-8.), 7, MAX(scrollBarHeight+howMuchPast, 8.));
+    }
+    else {
         
     }
-    
-    // case B: we are pulling down, possibly revealing the header.
-    else if (contentOffset < 0.0) {
-        
-        NSLog(@"B");
-        
-        // bring the header into view if it's not already fully visible
-        if (numberOfPointsOfHeaderViewVisible < self.headerView.frame.size.height) {
-            
-            // push the header down.
-            float newHeaderPositionY = self.headerView.frame.origin.y - contentOffset;
-            CGRect headerFrame = self.headerView.frame;
-            headerFrame.origin.y = MIN(newHeaderPositionY, 0);
-            self.headerView.frame = headerFrame;
-            
-            // adjust the size of the web view.
-            CGRect webFrame = self.webView.frame;
-            webFrame.origin.y = self.headerView.frame.size.height + self.headerView.frame.origin.y;
-            webFrame.size.height = MIN(self.view.frame.size.height - webFrame.origin.y, self.view.frame.size.height);
-            self.webView.frame = webFrame;
-            
-            // keep the webview from scrolling
-            //self.webView.scrollView.contentOffset = CGPointZero;
-        }
-        
-        // the header is already fully visible, but we keep pushing down, we want to forward events to the enclosing scroll view
-        else {
-            if (fingerIsDown) {
-                
-                NSLog(@"E");
-                
-                UIScrollView *scrollViewWrapper = (UIScrollView *)self.view;
-                
-                // scroll the scrollView
-                [scrollViewWrapper setContentOffset:CGPointMake(0, scrollViewWrapper.contentOffset.y + contentOffset)];
-                
-                // adjust the size of the web view.
-                CGRect webFrame = self.webView.frame;
-                webFrame.size.height = webView.frame.size.height + contentOffset;
-                self.webView.frame = webFrame;
-                
-                // keep the webview from scrolling
-                self.webView.scrollView.contentOffset = CGPointZero;
-            }
-            // finger isn't down, but we may need to adjust
-            else {
-                
 
-                
-                        NSLog(@"D");
-                
-                // adjust the size of the web view.
-                /*
-                CGRect webFrame = self.webView.frame;
-                webFrame.origin.y = self.headerView.frame.size.height + self.headerView.frame.origin.y;
-                webFrame.size.height = MIN(self.view.frame.size.height - webFrame.origin.y, self.view.frame.size.height);
-                self.webView.frame = webFrame;
-                 */
 
-                
-                // keep the webview from scrolling
-                //self.webView.scrollView.contentOffset = CGPointZero;
-            }
-        }
-    }
 }
 
 -(void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset {
@@ -165,14 +123,12 @@
 }
 
 -(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
-    UIScrollView *scrollViewWrapper = (UIScrollView *)self.view;
     
-    // scroll the scrollView
-    [scrollViewWrapper setContentOffset:CGPointMake(0, 0) animated:YES];
 }
 
 -(void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView {
     NSLog(@"decelerate");
+    [UIView animateWithDuration:0.5 delay:.5 options:UIViewAnimationOptionCurveEaseInOut animations:^{ self.scrollIndicatorVertical.alpha = 0; } completion:nil];
 }
 
 -(void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
@@ -186,6 +142,8 @@
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
     NSLog(@"scrolling will begin");
     fingerIsDown = YES;
+    
+    [self.scrollIndicatorVertical setAlpha:1.];
 }
 
 

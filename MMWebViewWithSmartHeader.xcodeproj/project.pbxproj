@@ -15,6 +15,8 @@
 		E4431D0F15CB860300918F2F /* MMAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E4431D0E15CB860300918F2F /* MMAppDelegate.m */; };
 		E4431D1215CB860300918F2F /* MMSmartHeaderWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = E4431D1115CB860300918F2F /* MMSmartHeaderWebView.m */; };
 		E4431D1515CB860300918F2F /* MMSmartHeaderWebView.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4431D1315CB860300918F2F /* MMSmartHeaderWebView.xib */; };
+		E4A34BBA15D02D830039734B /* scroll-bar.png in Resources */ = {isa = PBXBuildFile; fileRef = E4A34BB915D02D830039734B /* scroll-bar.png */; };
+		E4A34BBD15D02FD30039734B /* scroll-bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E4A34BBC15D02FD30039734B /* scroll-bar@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +33,8 @@
 		E4431D1015CB860300918F2F /* MMSmartHeaderWebView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MMSmartHeaderWebView.h; sourceTree = "<group>"; };
 		E4431D1115CB860300918F2F /* MMSmartHeaderWebView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MMSmartHeaderWebView.m; sourceTree = "<group>"; };
 		E4431D1415CB860300918F2F /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MMSmartHeaderWebView.xib; sourceTree = "<group>"; };
+		E4A34BB915D02D830039734B /* scroll-bar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "scroll-bar.png"; sourceTree = "<group>"; };
+		E4A34BBC15D02FD30039734B /* scroll-bar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "scroll-bar@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,6 +54,7 @@
 		E4431CEF15CB860300918F2F = {
 			isa = PBXGroup;
 			children = (
+				E4A34BB815D02D830039734B /* images */,
 				E4431D0415CB860300918F2F /* MMWebViewWithSmartHeader */,
 				E4431CFD15CB860300918F2F /* Frameworks */,
 				E4431CFB15CB860300918F2F /* Products */,
@@ -96,6 +101,16 @@
 				E4431D0C15CB860300918F2F /* MMWebViewWithSmartHeader-Prefix.pch */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E4A34BB815D02D830039734B /* images */ = {
+			isa = PBXGroup;
+			children = (
+				E4A34BBC15D02FD30039734B /* scroll-bar@2x.png */,
+				E4A34BB915D02D830039734B /* scroll-bar.png */,
+			);
+			name = images;
+			path = MMWebViewWithSmartHeader/images;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -152,6 +167,8 @@
 			files = (
 				E4431D0915CB860300918F2F /* InfoPlist.strings in Resources */,
 				E4431D1515CB860300918F2F /* MMSmartHeaderWebView.xib in Resources */,
+				E4A34BBA15D02D830039734B /* scroll-bar.png in Resources */,
+				E4A34BBD15D02FD30039734B /* scroll-bar@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
