@@ -15,7 +15,7 @@
 @implementation MMSmartHeaderWebView
 @synthesize webView;
 @synthesize headerView = _headerView;
-@synthesize pinHeader;
+@synthesize pinHeader = _pinHeader;
 
 - (void)setHeaderView:(UIView *)newHeaderView {
     
@@ -54,6 +54,47 @@
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+- (void)setPinHeader:(BOOL)newValue {
+    
+    float numberOfPointsOfHeaderVisible = MAX(0, -self.webView.scrollView.contentOffset.y);
+    
+    if (newValue == YES) {
+        [self.view addSubview:self.headerView];
+        
+        // already fully visible, simply set position since it won't seem to move to the user
+        if (numberOfPointsOfHeaderVisible >= self.headerView.frame.size.height) {
+            CGRect headerFrame = self.headerView.frame;
+            headerFrame.origin.y = MAX(0, -self.webView.scrollView.contentOffset.y - self.headerView.frame.size.height);
+            self.headerView.frame = headerFrame;
+        }
+        // partially visible or not at all, animate from current position into view
+        else {
+            CGRect headerFrame = self.headerView.frame;
+            headerFrame.origin.y = -self.headerView.frame.size.height + numberOfPointsOfHeaderVisible;
+            self.headerView.frame = headerFrame;
+            
+            [UIView animateWithDuration:0.2 animations:^ {
+                CGRect headerFrame = self.headerView.frame;
+                headerFrame.origin.y = MAX(0, -self.webView.scrollView.contentOffset.y - self.headerView.frame.size.height);
+                self.headerView.frame = headerFrame;
+            }];
+        }
+    }
+    
+    // pinHeader == NO
+    else {
+        //self.webView.scrollView.contentInset = UIEdgeInsetsMake(self.headerView.frame.size.height, 0.0f, 0.0f, 0.0f);
+        self.headerView.frame = CGRectMake(0, 0, self.headerView.frame.size.width, -self.headerView.frame.size.height);
+        [self.webView.scrollView addSubview:self.headerView];
+    }
+    
+    _pinHeader = newValue;
+}
+
+- (BOOL)pinHeader {
+    return _pinHeader;
+}
+
 #pragma mark - UIScrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
@@ -62,13 +103,23 @@
     self.webView.scrollView.scrollIndicatorInsets = UIEdgeInsetsMake(bottomOfHeaderView, 0, 0, 0);
     
     // anchor the header at the top of the screen
-    if (pinHeader) {
+    if (_pinHeader) {
         CGRect headerFrame = self.headerView.frame;
         headerFrame.origin.y = MAX(0, -scrollView.contentOffset.y - self.headerView.frame.size.height);
         self.headerView.frame = headerFrame;
-        
-        [self.view addSubview:self.headerView];
     }
+        
 }
 
+#pragma mark - UIWebViewDelegate
+
+- (void)webViewDidStartLoad:(UIWebView *)webView {
+    self.pinHeader = YES;
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+    self.pinHeader = NO;
+    
+
+}
 @end
