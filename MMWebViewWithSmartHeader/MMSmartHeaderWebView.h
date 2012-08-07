@@ -8,12 +8,17 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MMSmartHeaderWebView : UIViewController <UIWebViewDelegate, UIScrollViewDelegate> {
+@interface MMSmartHeaderWebView : NSObject <UIScrollViewDelegate> {
+    
 }
 
-@property (weak, nonatomic) IBOutlet UIWebView *webView;
-@property (weak, nonatomic) UIView *headerView;
+// the enclosing view
+@property (strong, nonatomic) UIWebView *webView;
+@property (strong, nonatomic) UIView *headerView;
 
+// set this to pin/unpin the header to be always visible. includes an animation into / out of sight if at an appopriate scroll position
 @property BOOL pinHeader;
+
+- (id)initWithFrame:(CGRect)newFrame header:(UIView *)header;
 
 @end

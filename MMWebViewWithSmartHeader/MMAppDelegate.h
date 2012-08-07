@@ -8,12 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
-@class MMSmartHeaderWebView;
+@class RootViewController;
 
 @interface MMAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 
-@property (strong, nonatomic) MMSmartHeaderWebView *viewController;
+@property (strong, nonatomic) RootViewController *viewController;
 
 @end
