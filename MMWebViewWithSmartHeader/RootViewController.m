@@ -33,8 +33,8 @@
     [super viewDidLoad];
     
     self.smartView = [[MMSmartHeaderWebView alloc] initWithFrame:self.view.frame header:self.headerView];
-    [self.view addSubview:smartView.webView];
-    [smartView.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString: @"http://michaelmanesh.com"]]];
+    [self.view addSubview:smartView];
+    [smartView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString: @"http://michaelmanesh.com"]]];
 }
 
 - (void)viewDidUnload
@@ -51,7 +51,7 @@
 }
 
 - (IBAction)backAction:(id)sender {
-    [self.smartView.webView goBack];
+    [self.smartView goBack];
 }
 
 - (IBAction)pinAction:(id)sender {
