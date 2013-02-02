@@ -81,7 +81,11 @@
         self.headerView.frame = headerFrame;
         self.scrollView.scrollIndicatorInsets = UIEdgeInsetsMake(MAX(self.headerView.frame.size.height, -scrollView.contentOffset.y), 0, 0, 0);
     }
-        
+	
+	// keep header anchored within the view
+	CGRect frame = self.headerView.frame;
+	frame.origin.x = scrollView.contentOffset.x;
+	self.headerView.frame = frame;
 }
 
 @end

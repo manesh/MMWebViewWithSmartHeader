@@ -33,6 +33,7 @@
     [super viewDidLoad];
     
     self.smartView = [[MMSmartHeaderWebView alloc] initWithFrame:self.view.frame header:self.headerView];
+	self.smartView.scalesPageToFit = YES;
     [self.view addSubview:smartView];
     [smartView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString: @"http://michaelmanesh.com"]]];
 }
